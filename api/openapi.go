@@ -10,7 +10,7 @@ import (
 //go:embed openapi.json
 var openAPISpec []byte
 
-const openAPIContractVersion = "1.8.0"
+const openAPIContractVersion = "1.8.1"
 
 var openAPISpecSHA256 = func() string {
 	sum := sha256.Sum256(openAPISpec)

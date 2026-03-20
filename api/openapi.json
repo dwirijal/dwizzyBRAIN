@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "dwizzyBRAIN API",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "description": "Standardized read API for market snapshots, OHLCV candles, aggregated tickers, arbitrage signals, quant pattern search, DeFi registry reads, news feeds, and auth/session endpoints."
   },
   "servers": [
