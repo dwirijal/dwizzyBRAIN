@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dwizzybrain-auth-worker",
+  "main": "index.ts",
+  "compatibility_date": "2026-03-19",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "auth.dwizzy.my.id",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "AUTH_API_ORIGIN": "https://api.dwizzy.my.id",
+    "JWT_ISSUER": "dwizzyBRAIN",
+    "JWT_AUDIENCE": "dwizzyOS-api",
+    "AUTH_ALLOWED_ORIGINS": "https://app.dwizzy.my.id,https://dwizzy.my.id"
+  }
+}

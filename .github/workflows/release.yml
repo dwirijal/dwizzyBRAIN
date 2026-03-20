@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build And Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache-dependency-path: go.sum
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install quant test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e "quant[dev]"
+
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action/install@v2
+        with:
+          version: v2.5.0
+
+      - name: Quality gates
+        run: make quality
+
+      - name: Package source and migrations
+        run: |
+          VERSION="${GITHUB_REF_NAME:-manual}"
+          tar -czf "dwizzyBRAIN-${VERSION}.tar.gz" \
+            go.mod go.sum engine shared migrations docs PRD.md Makefile .golangci.yml
+          tar -czf "dwizzyBRAIN-migrations-${VERSION}.tar.gz" migrations
+
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dwizzyBRAIN-${{ github.ref_name }}.tar.gz
+            dwizzyBRAIN-migrations-${{ github.ref_name }}.tar.gz

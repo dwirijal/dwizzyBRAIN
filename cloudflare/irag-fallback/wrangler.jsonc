@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dwizzybrain-irag-fallback",
+  "main": "index.ts",
+  "compatibility_date": "2026-03-19",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "api2.dwizzy.my.id",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "IRAG_PRIMARY_ORIGIN": "https://api.dwizzy.my.id",
+    "IRAG_SECONDARY_ORIGIN": "",
+    "IRAG_ORIGIN_HOST_HEADER": "api.dwizzy.my.id",
+    "IRAG_RESOLVE_OVERRIDE": "21a55747-af8d-4f87-9976-174bf6849a68.cfargotunnel.com",
+    "IRAG_ALLOWED_ORIGINS": "https://app.dwizzy.my.id,https://dwizzy.my.id",
+    "IRAG_TIMEOUT_MS": "4000"
+  }
+}

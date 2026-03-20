@@ -1,0 +1,10 @@
+{
+  "network": "kaia",
+  "chainId": 8217,
+  "contractName": "SubscriptionManager",
+  "address": "0x0Bd231DDFd5659278458696f784ce88CBa8Bae0e",
+  "owner": "0x6816Ba2CB2bC013A78225228A153586CA63B1548",
+  "deployer": "0x6816Ba2CB2bC013A78225228A153586CA63B1548",
+  "txHash": "0x6ae0bedef986afea055a7264e36770b8eb4c9b1941a10e685a3746d811b1c8de",
+  "deployedAt": "2026-03-19T18:59:18.860Z"
+}

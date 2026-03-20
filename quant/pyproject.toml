@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dwizzybrain-quant"
+version = "0.1.0"
+description = "Quant worker for dwizzyBRAIN market signals."
+requires-python = ">=3.12"
+dependencies = [
+  "numpy>=2.0,<3.0",
+  "pandas>=2.2,<3.0",
+  "pandas-ta>=0.3.14b0",
+  "duckdb>=1.5,<2.0",
+  "psycopg[binary]>=3.2,<4.0",
+  "redis>=6.4,<7.0",
+  "yfinance>=0.2,<1.0",
+  "scikit-learn>=1.5,<2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "fakeredis>=2.32,<3.0",
+  "pytest>=9.0,<10.0",
+  "pytest-cov>=7.0,<8.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

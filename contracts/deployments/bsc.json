@@ -1,0 +1,10 @@
+{
+  "network": "bsc",
+  "chainId": 56,
+  "contractName": "SubscriptionManager",
+  "address": "0x8357e65F8223c2662F0eCde232F18B043E120159",
+  "owner": "0x6816Ba2CB2bC013A78225228A153586CA63B1548",
+  "deployer": "0x6816Ba2CB2bC013A78225228A153586CA63B1548",
+  "txHash": "0x3be3d2189ae34aa31be74c6a29bf41d89266e761c4dd268543fee03dc183b466",
+  "deployedAt": "2026-03-19T18:59:13.402Z"
+}

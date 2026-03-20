@@ -1,0 +1,23 @@
+{
+  "name": "dwizzybrain-contracts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compile": "node scripts/compile.mjs",
+    "deploy:base": "node scripts/deploy.mjs base",
+    "deploy:bsc": "node scripts/deploy.mjs bsc",
+    "deploy:kaia": "node scripts/deploy.mjs kaia",
+    "deploy:sonic": "node scripts/deploy.mjs sonic",
+    "deploy:arbitrum": "node scripts/deploy.mjs arbitrum",
+    "deploy:abstract": "node scripts/deploy.mjs abstract",
+    "deploy:hyperevm": "node scripts/deploy.mjs hyperevm",
+    "deploy:selected": "node scripts/deploy-selected.mjs",
+    "deploy:all": "node scripts/deploy-selected.mjs",
+    "deploy:available": "SUBSCRIPTION_DEPLOY_NETWORKS=base,bsc,kaia,arbitrum node scripts/deploy-selected.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.5",
+    "solc": "^0.8.30"
+  }
+}

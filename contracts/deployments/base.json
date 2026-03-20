@@ -1,0 +1,10 @@
+{
+  "network": "base",
+  "chainId": 8453,
+  "contractName": "SubscriptionManager",
+  "address": "0x830F0317eA5005C581dCCf13193DB3f0c90270B2",
+  "owner": "0x6816Ba2CB2bC013A78225228A153586CA63B1548",
+  "deployer": "0x6816Ba2CB2bC013A78225228A153586CA63B1548",
+  "txHash": "0x4ff0b45687138005b76b8f1f551e2dfc7228c1adee6c0dfcac9d2ef5f1ec4928",
+  "deployedAt": "2026-03-19T18:59:07.838Z"
+}

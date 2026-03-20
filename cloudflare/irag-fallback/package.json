@@ -1,0 +1,11 @@
+{
+  "name": "@dwizzybrain/irag-fallback",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test ./index.test.ts"
+  },
+  "devDependencies": {
+    "wrangler": "^4.75.0"
+  }
+}

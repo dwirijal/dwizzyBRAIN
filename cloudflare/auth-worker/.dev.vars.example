@@ -1,0 +1,5 @@
+JWT_SECRET=change-me
+AUTH_API_ORIGIN=https://api.dwizzy.my.id
+JWT_ISSUER=dwizzyBRAIN
+JWT_AUDIENCE=dwizzyOS-api
+AUTH_ALLOWED_ORIGINS=https://app.dwizzy.my.id,https://dwizzy.my.id

@@ -1,0 +1,10 @@
+{
+  "network": "arbitrum",
+  "chainId": 42161,
+  "contractName": "SubscriptionManager",
+  "address": "0x4d6B7628678B921F12646B023F44b3ea09889ce7",
+  "owner": "0x6816Ba2CB2bC013A78225228A153586CA63B1548",
+  "deployer": "0x6816Ba2CB2bC013A78225228A153586CA63B1548",
+  "txHash": "0xe9714e7fc9fa52da74a6a148479326915ad091f61274670831a8517f2b0b1f55",
+  "deployedAt": "2026-03-19T18:59:41.075Z"
+}

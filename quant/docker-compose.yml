@@ -1,0 +1,11 @@
+services:
+  quant:
+    build:
+      context: .
+      dockerfile: Dockerfile.quant
+    env_file:
+      - ../.env
+    environment:
+      QUANT_MODE: run
+    command: ["python", "-m", "quant.main"]
+    restart: unless-stopped
