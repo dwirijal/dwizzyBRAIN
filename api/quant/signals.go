@@ -171,7 +171,7 @@ func (s *Service) loadSignals(ctx context.Context, symbol, timeframe, exchange s
 
 	const baseQuery = `
 SELECT
-    id,
+    row_id,
     created_at,
     coin_id,
     exchange,
@@ -196,9 +196,37 @@ SELECT
     price_deviation,
     anomaly_score,
     price_at_signal
-FROM signals
-WHERE %s
-ORDER BY created_at DESC, id DESC
+FROM (
+    SELECT
+        ROW_NUMBER() OVER (ORDER BY created_at DESC, ctid DESC) AS row_id,
+        created_at,
+        COALESCE(coin_id, NULLIF(symbol_override, ''), symbol, '') AS coin_id,
+        COALESCE(exchange, '') AS exchange,
+        COALESCE(symbol, NULLIF(symbol_override, ''), '') AS symbol,
+        COALESCE(timeframe, '') AS timeframe,
+        quant_score,
+        signal_type,
+        strength::text AS strength,
+        rsi_14,
+        macd_line,
+        macd_signal,
+        macd_hist,
+        bb_upper,
+        bb_lower,
+        bb_mid,
+        ema_9,
+        ema_21,
+        ema_200,
+        funding_rate,
+        funding_sentiment::text AS funding_sentiment,
+        volume_spike,
+        price_deviation,
+        anomaly_score,
+        price_at_signal
+    FROM signals
+    WHERE %s
+) ordered_signals
+ORDER BY row_id ASC
 LIMIT $%d
 `
 	query := fmt.Sprintf(baseQuery, strings.Join(where, " AND "), len(args))

@@ -45,10 +45,6 @@ func run() error {
 	}
 	defer postgresPool.Close()
 
-	if err := bootstrapMarketCatalog(ctx, postgresPool); err != nil {
-		log.Printf("market bootstrap skipped: %v", err)
-	}
-
 	var cache redis.Cmdable
 	if client, err := storage.NewValkeyClientFromEnv(ctx); err != nil {
 		log.Printf("market cache unavailable: %v", err)
@@ -98,6 +94,12 @@ func run() error {
 	go func() {
 		log.Printf("api listening on %s", server.Addr)
 		errCh <- server.ListenAndServe()
+	}()
+
+	go func() {
+		if err := bootstrapMarketCatalog(ctx, postgresPool); err != nil {
+			log.Printf("market bootstrap skipped: %v", err)
+		}
 	}()
 
 	return waitForServer(ctx, server.Shutdown, errCh)
