@@ -15,7 +15,10 @@ func publicProviderCode(name string) string {
 	case string(ProviderChocomilk):
 		return "c"
 	default:
-		return ""
+		if name = strings.TrimSpace(name); name != "" {
+			return strings.ToLower(name)
+		}
+		return "unknown"
 	}
 }
 

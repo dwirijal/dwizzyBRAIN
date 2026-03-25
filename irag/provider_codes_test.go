@@ -9,7 +9,7 @@ func TestPublicProviderCode(t *testing.T) {
 		"kanata":    "k",
 		"ytdlp":     "y",
 		"chocomilk": "c",
-		"unknown":   "",
+		"unknown":   "unknown",
 	}
 
 	for name, want := range tests {
@@ -23,7 +23,7 @@ func TestPublicProviderCode(t *testing.T) {
 
 func TestPublicProviderCodes(t *testing.T) {
 	got := publicProviderCodes([]string{"nexure", "unknown", "ryzumi", "kanata"})
-	want := []string{"n", "r", "k"}
+	want := []string{"n", "unknown", "r", "k"}
 
 	if len(got) != len(want) {
 		t.Fatalf("publicProviderCodes length = %d, want %d (%v)", len(got), len(want), got)

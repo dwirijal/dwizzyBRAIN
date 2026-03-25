@@ -500,6 +500,68 @@ func TestIragDirectAliasGuardsUnknownSlugs(t *testing.T) {
 	}
 }
 
+func TestIragWriteResponseUsesPublicProviderCodes(t *testing.T) {
+	t.Parallel()
+
+	service := NewService(Config{}, nil, nil)
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/v1/ai/text/groq", nil)
+
+	service.writeResponse(rec, req, proxyResponse{
+		Status:   http.StatusOK,
+		Body:     []byte(`{"result":{"message":"ok"}}`),
+		Headers:  http.Header{"Content-Type": []string{"application/json"}},
+		Provider: string(ProviderNexure),
+	})
+
+	if got := rec.Header().Get("X-IRAG-Provider"); got != "n" {
+		t.Fatalf("expected header provider code n, got %q", got)
+	}
+	if got := rec.Header().Get("X-IRAG-Upstream"); got != "n" {
+		t.Fatalf("expected header upstream code n, got %q", got)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	meta, _ := payload["meta"].(map[string]any)
+	if got := meta["provider"]; got != "n" {
+		t.Fatalf("expected meta provider code n, got %#v", got)
+	}
+}
+
+func TestIragWriteResponseKeepsSafeUnknownProviderAttribution(t *testing.T) {
+	t.Parallel()
+
+	service := NewService(Config{}, nil, nil)
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/v1/ai/text/groq", nil)
+
+	service.writeResponse(rec, req, proxyResponse{
+		Status:   http.StatusOK,
+		Body:     []byte(`{"result":{"message":"ok"}}`),
+		Headers:  http.Header{"Content-Type": []string{"application/json"}},
+		Provider: "Mystery Provider",
+	})
+
+	if got := rec.Header().Get("X-IRAG-Provider"); got != "mystery provider" {
+		t.Fatalf("expected safe unknown header attribution, got %q", got)
+	}
+	if got := rec.Header().Get("X-IRAG-Upstream"); got != "mystery provider" {
+		t.Fatalf("expected safe unknown upstream attribution, got %q", got)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	meta, _ := payload["meta"].(map[string]any)
+	if got := meta["provider"]; got != "mystery provider" {
+		t.Fatalf("expected safe unknown meta attribution, got %#v", got)
+	}
+}
+
 func TestIragAIGenerateExactPathTranslation(t *testing.T) {
 	t.Parallel()
 
