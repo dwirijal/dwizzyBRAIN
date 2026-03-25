@@ -5,6 +5,7 @@ WORKDIR /src
 COPY go.mod go.sum ./
 COPY api ./api
 COPY engine ./engine
+COPY irag ./irag
 COPY shared ./shared
 
 RUN go build -trimpath -ldflags="-s -w" -o /out/dwizzyos-api ./api/cmd/api
