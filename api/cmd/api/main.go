@@ -15,6 +15,7 @@ import (
 	"dwizzyBRAIN/api"
 	authapi "dwizzyBRAIN/api/auth"
 	defiapi "dwizzyBRAIN/api/defi"
+	downloadapi "dwizzyBRAIN/api/download"
 	"dwizzyBRAIN/api/handler"
 	marketapi "dwizzyBRAIN/api/market"
 	"dwizzyBRAIN/api/middleware"
@@ -24,6 +25,7 @@ import (
 	"dwizzyBRAIN/engine/market/ohlcv"
 	engticker "dwizzyBRAIN/engine/market/ticker"
 	"dwizzyBRAIN/engine/storage"
+	"dwizzyBRAIN/irag"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	redis "github.com/redis/go-redis/v9"
@@ -83,6 +85,17 @@ func run() error {
 	defiHandler := handler.NewDefiHandler(defiService)
 	newsService := newsapi.NewService(postgresPool)
 	newsHandler := handler.NewNewsHandler(newsService)
+	downloadCfg, err := irag.ConfigFromEnv()
+	if err == nil {
+		downloadService := downloadapi.NewService(downloadCfg, nil, nil)
+		if downloadService.Enabled() {
+			log.Printf("download irag service initialized")
+		} else {
+			log.Printf("download irag unavailable")
+		}
+	} else {
+		log.Printf("download irag unavailable: %v", err)
+	}
 	quantService := quantapi.NewService(postgresPool)
 	quantHandler := handler.NewQuantHandler(quantService)
 	router := api.NewRouter(marketHandler, defiHandler, newsHandler, authHandler, quantHandler)
