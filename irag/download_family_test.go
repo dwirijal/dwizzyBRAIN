@@ -203,3 +203,27 @@ func TestDownloadFamilyTimeoutParityMatchesService(t *testing.T) {
 		t.Fatalf("expected timeout error parity, service=%#v family=%#v", serviceError, familyError)
 	}
 }
+
+func TestDownloadFamilyNoUpstreamsMatchesServiceFailure(t *testing.T) {
+	t.Parallel()
+
+	service := NewService(Config{Timeout: time.Second, CacheEnabled: false}, nil, nil)
+	req := httptest.NewRequest(http.MethodGet, "/v1/download/spotify?url=https://open.spotify.com/track/abc", nil)
+
+	serviceRec := httptest.NewRecorder()
+	service.ServeHTTP(serviceRec, req.Clone(req.Context()))
+
+	familyRec := httptest.NewRecorder()
+	NewDownloadFamily(service).ServeHTTP(familyRec, req.Clone(req.Context()))
+
+	if serviceRec.Code != http.StatusBadGateway {
+		t.Fatalf("expected service 502, got %d: %s", serviceRec.Code, serviceRec.Body.String())
+	}
+	if familyRec.Code != http.StatusBadGateway {
+		t.Fatalf("expected family 502, got %d: %s", familyRec.Code, familyRec.Body.String())
+	}
+
+	if familyRec.Body.String() != serviceRec.Body.String() {
+		t.Fatalf("expected no-upstreams parity, service=%s family=%s", serviceRec.Body.String(), familyRec.Body.String())
+	}
+}

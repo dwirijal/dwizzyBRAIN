@@ -43,12 +43,5 @@ func (f *DownloadFamily) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !f.service.Enabled() {
-		writeEnvelopeJSON(w, http.StatusServiceUnavailable, map[string]any{
-			"error": map[string]any{"message": "service unavailable"},
-		})
-		return
-	}
-
 	f.service.serveRoute(w, r, spec)
 }
