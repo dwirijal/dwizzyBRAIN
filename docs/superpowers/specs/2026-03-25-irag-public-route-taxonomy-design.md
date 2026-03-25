@@ -34,6 +34,7 @@ This keeps the public contract stable even if upstream providers, fallback order
 3. Fallback order is an internal adapter concern.
 4. Canonical platform data stays separate from wrapped upstream surfaces.
 5. Every wrapped family returns the same gateway metadata shape.
+6. Provider identity is minimized in public responses.
 
 ## Top-Level Namespace
 
@@ -209,7 +210,7 @@ Every wrapped family should expose a consistent gateway envelope:
 {
   "data": {},
   "meta": {
-    "providers_used": ["nexure", "ryzumi"],
+    "providers_used": ["n", "r"],
     "partial": false,
     "fallback_used": true,
     "cache_status": "hit"
@@ -224,6 +225,21 @@ Minimum metadata fields:
 - `partial`
 - `fallback_used`
 - `cache_status`
+
+Provider codes are intentionally short in public metadata:
+
+- `n` = Nexure
+- `r` = Ryzumi
+- `k` = Kanata
+- `y` = YTDLP
+- `c` = Chocomilk
+
+Rules:
+
+- Public responses expose provider codes only.
+- Public routes never expose provider names in URL paths.
+- Internal logs, traces, metrics, and adapter registries may keep full provider names.
+- If a debug or admin surface ever needs verbose provider data, it belongs under internal-only routes, not public API responses.
 
 ## Internal Implementation Boundary
 
