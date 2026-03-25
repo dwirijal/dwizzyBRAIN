@@ -1201,13 +1201,10 @@ func (s *Service) writeResponse(w http.ResponseWriter, r *http.Request, resp pro
 	}
 
 	meta := map[string]any{
-		"provider":       publicProvider,
-		"providers_used": publicProviderCodes(resp.FallbackChain),
-		"fallback_used":  len(resp.FallbackChain) > 1,
-		"latency_ms":     int(resp.Latency / time.Millisecond),
-		"cached":         false,
-		"cache_ttl":      0,
-		"cache_status":   "miss",
+		"provider":   publicProvider,
+		"latency_ms": int(resp.Latency / time.Millisecond),
+		"cached":     false,
+		"cache_ttl":  0,
 	}
 	body, err := buildEnvelope(resp.Status, normalizeJSONBody(resp.Body), meta, "")
 	if err != nil {
@@ -1242,16 +1239,13 @@ func (s *Service) writeFailure(w http.ResponseWriter, status int, spec routeSpec
 		"code": status,
 		"error": map[string]any{
 			"message":  err.Error(),
-			"upstream": strings.Join(publicProviderCodes(attempted), " -> "),
+			"upstream": strings.Join(attempted, " -> "),
 		},
 		"meta": map[string]any{
-			"provider":       "",
-			"providers_used": publicProviderCodes(attempted),
-			"fallback_used":  len(attempted) > 1,
-			"latency_ms":     0,
-			"cached":         false,
-			"cache_ttl":      int(spec.CacheTTL / time.Second),
-			"cache_status":   "miss",
+			"provider":   "",
+			"latency_ms": 0,
+			"cached":     false,
+			"cache_ttl":  int(spec.CacheTTL / time.Second),
 		},
 		"timestamp": time.Now().UTC().Format(time.RFC3339),
 	})
