@@ -1413,10 +1413,19 @@ func (s *Service) routeSpecForPath(path string) routeSpec {
 	case lower == "/v1/llm/chatgpt/completions":
 		return routeSpec{Category: "llm", Providers: llmChain(lower), CacheTTL: 0, Timeout: s.cfg.Timeout}
 	case strings.HasPrefix(lower, "/v1/download/youtube/search"):
+		if !downloadRouteAllowed(lower) {
+			return routeSpec{}
+		}
 		return routeSpec{Category: "search", Providers: []ProviderName{ProviderRyzumi, ProviderNexure}, CacheTTL: 5 * time.Minute, Timeout: s.cfg.Timeout}
 	case strings.HasPrefix(lower, "/v1/download/youtube/playlist"), strings.HasPrefix(lower, "/v1/download/youtube/subtitle"), strings.HasPrefix(lower, "/v1/download/spotify/playlist"), strings.HasPrefix(lower, "/v1/download/tiktok/hd"), strings.HasPrefix(lower, "/v1/download/douyin"), strings.HasPrefix(lower, "/v1/download/applemusic"), strings.HasPrefix(lower, "/v1/download/mediafire"):
+		if !downloadRouteAllowed(lower) {
+			return routeSpec{}
+		}
 		return routeSpec{Category: "download", Providers: downloadChain(lower), CacheTTL: 30 * time.Minute, Timeout: 7 * time.Minute}
 	case strings.HasPrefix(lower, "/v1/download/"):
+		if !downloadRouteAllowed(lower) {
+			return routeSpec{}
+		}
 		return routeSpec{Category: "download", Providers: downloadChain(lower), CacheTTL: 30 * time.Minute, Timeout: s.cfg.Timeout}
 	case strings.HasPrefix(lower, "/v1/search/"):
 		return routeSpec{Category: "search", Providers: searchChain(lower), CacheTTL: 5 * time.Minute, Timeout: s.cfg.Timeout}

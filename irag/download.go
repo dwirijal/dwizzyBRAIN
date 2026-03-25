@@ -296,3 +296,81 @@ func firstNonEmpty(values ...string) string {
 	}
 	return ""
 }
+
+func downloadRouteAllowed(path string) bool {
+	lower := strings.ToLower(strings.TrimSpace(path))
+	switch {
+	case lower == "/v1/download/aio",
+		lower == "/v1/download/youtube",
+		lower == "/v1/download/youtube/info",
+		lower == "/v1/download/youtube/video",
+		lower == "/v1/download/youtube/audio",
+		lower == "/v1/download/youtube/playlist",
+		lower == "/v1/download/youtube/subtitle",
+		lower == "/v1/download/youtube/search",
+		lower == "/v1/download/tiktok",
+		lower == "/v1/download/tiktok/hd",
+		lower == "/v1/download/douyin",
+		lower == "/v1/download/instagram",
+		lower == "/v1/download/instagram/story",
+		lower == "/v1/download/spotify",
+		lower == "/v1/download/spotify/playlist",
+		lower == "/v1/download/facebook",
+		lower == "/v1/download/threads",
+		lower == "/v1/download/twitter",
+		lower == "/v1/download/pinterest",
+		lower == "/v1/download/soundcloud",
+		lower == "/v1/download/soundcloud/playlist",
+		lower == "/v1/download/gdrive",
+		lower == "/v1/download/bilibili",
+		lower == "/v1/download/bstation",
+		lower == "/v1/download/tidal",
+		lower == "/v1/download/deezer",
+		lower == "/v1/download/capcut",
+		lower == "/v1/download/scribd",
+		lower == "/v1/download/mediafire",
+		lower == "/v1/download/mega",
+		lower == "/v1/download/terabox",
+		lower == "/v1/download/pixeldrain",
+		lower == "/v1/download/krakenfiles",
+		lower == "/v1/download/danbooru",
+		lower == "/v1/download/reddit",
+		lower == "/v1/download/applemusic",
+		lower == "/v1/download/videy",
+		lower == "/v1/download/sfile",
+		lower == "/v1/download/shopee/video",
+		lower == "/v1/download/nhentai":
+		return true
+	case strings.HasPrefix(lower, "/v1/download/youtube/"),
+		strings.HasPrefix(lower, "/v1/download/tiktok/"),
+		strings.HasPrefix(lower, "/v1/download/instagram/"),
+		strings.HasPrefix(lower, "/v1/download/spotify/"),
+		strings.HasPrefix(lower, "/v1/download/soundcloud/"),
+		strings.HasPrefix(lower, "/v1/download/bilibili/"),
+		strings.HasPrefix(lower, "/v1/download/bstation/"):
+		return true
+	case strings.HasPrefix(lower, "/v1/download/facebook/"),
+		strings.HasPrefix(lower, "/v1/download/threads/"),
+		strings.HasPrefix(lower, "/v1/download/twitter/"),
+		strings.HasPrefix(lower, "/v1/download/pinterest/"),
+		strings.HasPrefix(lower, "/v1/download/gdrive/"),
+		strings.HasPrefix(lower, "/v1/download/tidal/"),
+		strings.HasPrefix(lower, "/v1/download/deezer/"),
+		strings.HasPrefix(lower, "/v1/download/capcut/"),
+		strings.HasPrefix(lower, "/v1/download/scribd/"),
+		strings.HasPrefix(lower, "/v1/download/mediafire/"),
+		strings.HasPrefix(lower, "/v1/download/mega/"),
+		strings.HasPrefix(lower, "/v1/download/terabox/"),
+		strings.HasPrefix(lower, "/v1/download/pixeldrain/"),
+		strings.HasPrefix(lower, "/v1/download/krakenfiles/"),
+		strings.HasPrefix(lower, "/v1/download/danbooru/"),
+		strings.HasPrefix(lower, "/v1/download/reddit/"),
+		strings.HasPrefix(lower, "/v1/download/applemusic/"),
+		strings.HasPrefix(lower, "/v1/download/videy/"),
+		strings.HasPrefix(lower, "/v1/download/sfile/"),
+		strings.HasPrefix(lower, "/v1/download/nhentai/"):
+		return true
+	default:
+		return false
+	}
+}
