@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "dwizzyBRAIN API",
-    "version": "1.8.1",
-    "description": "Standardized read API for market snapshots, OHLCV candles, aggregated tickers, arbitrage signals, quant pattern search, DeFi registry reads, news feeds, and auth/session endpoints."
+    "version": "2.2.0",
+    "description": "Unified gateway API for dwizzyOS content, auth, DeFi, and news services."
   },
   "servers": [
     {
@@ -17,12 +17,16 @@
       "description": "Service health checks"
     },
     {
-      "name": "Auth",
-      "description": "Discord OAuth2 login, sessions, and token refresh"
+      "name": "Content",
+      "description": "Canonical media content read endpoints"
     },
     {
-      "name": "Market",
-      "description": "Public market read endpoints"
+      "name": "Download",
+      "description": "Capability-first wrapped download endpoints"
+    },
+    {
+      "name": "Auth",
+      "description": "Discord OAuth2, Web3 auth, sessions, and entitlements"
     },
     {
       "name": "DeFi",
@@ -31,18 +35,12 @@
     {
       "name": "News",
       "description": "Public news feeds, trends, and article reads"
-    },
-    {
-      "name": "Quant",
-      "description": "Quant pattern search and similarity analytics"
     }
   ],
   "paths": {
     "/": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "API index",
         "operationId": "getApiIndex",
         "responses": {
@@ -61,9 +59,7 @@
     },
     "/v1/health": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "Health check",
         "operationId": "getHealth",
         "responses": {
@@ -80,35 +76,478 @@
         }
       }
     },
-    "/v1/auth/discord/start": {
+    "/v1/content/manhwa": {
       "get": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Redirect to Discord OAuth",
-        "operationId": "redirectDiscordOAuth",
+        "tags": ["Content"],
+        "summary": "List manhwa titles",
+        "operationId": "listManhwa",
         "responses": {
-          "302": {
-            "description": "Redirect to Discord authorization URL"
+          "200": {
+            "description": "Manhwa list response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/content/manhwa/{slug}": {
+      "get": {
+        "tags": ["Content"],
+        "summary": "Get a manhwa series",
+        "operationId": "getManhwa",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Manhwa detail response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/content/manhwa/{slug}/units": {
+      "get": {
+        "tags": ["Content"],
+        "summary": "List manhwa chapters",
+        "operationId": "listManhwaUnits",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Manhwa chapter list response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/content/units/{slug}": {
+      "get": {
+        "tags": ["Content"],
+        "summary": "Get a content unit",
+        "operationId": "getContentUnit",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Content unit response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/download/aio": {
+      "get": {
+        "tags": ["Download"],
+        "summary": "Get AIO download options",
+        "operationId": "getDownloadAio",
+        "responses": {
+          "200": {
+            "description": "AIO download response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                },
+                "example": {
+                  "data": {
+                    "source": "aio",
+                    "variant": "all"
+                  },
+                  "meta": {
+                    "providers_used": ["n", "r"],
+                    "partial": false,
+                    "fallback_used": true,
+                    "cache_status": "miss"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           },
           "503": {
             "$ref": "#/components/responses/ServiceUnavailableError"
           }
         }
-      },
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Create Discord OAuth start payload",
-        "operationId": "createDiscordOAuthStart",
+      }
+    },
+    "/v1/download/youtube/info": {
+      "get": {
+        "tags": ["Download"],
+        "summary": "Get YouTube download info",
+        "operationId": "getDownloadYoutubeInfo",
         "responses": {
           "200": {
-            "description": "Discord authorization URL and state payload",
+            "description": "YouTube info download response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthStartResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
+                },
+                "example": {
+                  "data": {
+                    "source": "youtube",
+                    "variant": "info"
+                  },
+                  "meta": {
+                    "providers_used": ["n", "r"],
+                    "partial": false,
+                    "fallback_used": true,
+                    "cache_status": "miss"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailableError"
+          }
+        }
+      }
+    },
+    "/v1/download/youtube/video": {
+      "get": {
+        "tags": ["Download"],
+        "summary": "Get YouTube video downloads",
+        "operationId": "getDownloadYoutubeVideo",
+        "responses": {
+          "200": {
+            "description": "YouTube video download response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                },
+                "example": {
+                  "data": {
+                    "source": "youtube",
+                    "variant": "video"
+                  },
+                  "meta": {
+                    "providers_used": ["n", "r"],
+                    "partial": false,
+                    "fallback_used": true,
+                    "cache_status": "miss"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailableError"
+          }
+        }
+      }
+    },
+    "/v1/download/youtube/audio": {
+      "get": {
+        "tags": ["Download"],
+        "summary": "Get YouTube audio downloads",
+        "operationId": "getDownloadYoutubeAudio",
+        "responses": {
+          "200": {
+            "description": "YouTube audio download response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                },
+                "example": {
+                  "data": {
+                    "source": "youtube",
+                    "variant": "audio"
+                  },
+                  "meta": {
+                    "providers_used": ["n", "r"],
+                    "partial": false,
+                    "fallback_used": true,
+                    "cache_status": "miss"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailableError"
+          }
+        }
+      }
+    },
+    "/v1/download/youtube/playlist": {
+      "get": {
+        "tags": ["Download"],
+        "summary": "Get YouTube playlist downloads",
+        "operationId": "getDownloadYoutubePlaylist",
+        "responses": {
+          "200": {
+            "description": "YouTube playlist download response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                },
+                "example": {
+                  "data": {
+                    "source": "youtube",
+                    "variant": "playlist"
+                  },
+                  "meta": {
+                    "providers_used": ["n", "r"],
+                    "partial": false,
+                    "fallback_used": true,
+                    "cache_status": "miss"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailableError"
+          }
+        }
+      }
+    },
+    "/v1/download/youtube/subtitle": {
+      "get": {
+        "tags": ["Download"],
+        "summary": "Get YouTube subtitle downloads",
+        "operationId": "getDownloadYoutubeSubtitle",
+        "responses": {
+          "200": {
+            "description": "YouTube subtitle download response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                },
+                "example": {
+                  "data": {
+                    "source": "youtube",
+                    "variant": "subtitle"
+                  },
+                  "meta": {
+                    "providers_used": ["n", "r"],
+                    "partial": false,
+                    "fallback_used": true,
+                    "cache_status": "miss"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailableError"
+          }
+        }
+      }
+    },
+    "/v1/download/instagram": {
+      "get": {
+        "tags": ["Download"],
+        "summary": "Get Instagram downloads",
+        "operationId": "getDownloadInstagram",
+        "responses": {
+          "200": {
+            "description": "Instagram download response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                },
+                "example": {
+                  "data": {
+                    "source": "instagram",
+                    "variant": "media"
+                  },
+                  "meta": {
+                    "providers_used": ["n", "r"],
+                    "partial": false,
+                    "fallback_used": true,
+                    "cache_status": "miss"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailableError"
+          }
+        }
+      }
+    },
+    "/v1/download/tiktok": {
+      "get": {
+        "tags": ["Download"],
+        "summary": "Get TikTok downloads",
+        "operationId": "getDownloadTikTok",
+        "responses": {
+          "200": {
+            "description": "TikTok download response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                },
+                "example": {
+                  "data": {
+                    "source": "tiktok",
+                    "variant": "media"
+                  },
+                  "meta": {
+                    "providers_used": ["n", "r"],
+                    "partial": false,
+                    "fallback_used": true,
+                    "cache_status": "miss"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailableError"
+          }
+        }
+      }
+    },
+    "/v1/download/spotify": {
+      "get": {
+        "tags": ["Download"],
+        "summary": "Get Spotify downloads",
+        "operationId": "getDownloadSpotify",
+        "responses": {
+          "200": {
+            "description": "Spotify download response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
+                },
+                "example": {
+                  "data": {
+                    "source": "spotify",
+                    "variant": "track"
+                  },
+                  "meta": {
+                    "providers_used": ["n", "r"],
+                    "partial": false,
+                    "fallback_used": true,
+                    "cache_status": "miss"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailableError"
+          }
+        }
+      }
+    },
+    "/v1/auth/discord/start": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Start Discord OAuth",
+        "operationId": "startDiscordAuth",
+        "responses": {
+          "200": {
+            "description": "Discord auth start response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -121,45 +560,22 @@
     },
     "/v1/auth/discord/callback": {
       "get": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Complete Discord OAuth callback",
-        "operationId": "completeDiscordOAuth",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "tags": ["Auth"],
+        "summary": "Handle Discord OAuth callback",
+        "operationId": "completeDiscordAuth",
         "responses": {
           "200": {
-            "description": "Authenticated session response",
+            "description": "Discord auth completion response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthLoginResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
           },
           "503": {
             "$ref": "#/components/responses/ServiceUnavailableError"
@@ -169,37 +585,22 @@
     },
     "/v1/auth/web3/nonce": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Create a Web3 login nonce",
-        "operationId": "createWeb3LoginNonce",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Web3NonceRequest"
-              }
-            }
-          }
-        },
+        "tags": ["Auth"],
+        "summary": "Request a Web3 nonce",
+        "operationId": "createWeb3Nonce",
         "responses": {
           "200": {
-            "description": "Nonce challenge payload",
+            "description": "Web3 nonce response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Web3NonceResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
           },
           "503": {
             "$ref": "#/components/responses/ServiceUnavailableError"
@@ -209,28 +610,16 @@
     },
     "/v1/auth/web3/verify": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Verify a Web3 signature",
-        "operationId": "verifyWeb3LoginSignature",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Web3VerifyRequest"
-              }
-            }
-          }
-        },
+        "operationId": "verifyWeb3Signature",
         "responses": {
           "200": {
-            "description": "Authenticated session response",
+            "description": "Web3 verification response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthLoginResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -249,24 +638,19 @@
     },
     "/v1/auth/refresh": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Rotate refresh token",
-        "operationId": "refreshAuthSession",
+        "tags": ["Auth"],
+        "summary": "Refresh an auth session",
+        "operationId": "refreshSession",
         "responses": {
           "200": {
-            "description": "Rotated access and refresh token response",
+            "description": "Refresh response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthLoginResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
@@ -279,18 +663,16 @@
     },
     "/v1/auth/logout": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Revoke the current auth session",
-        "operationId": "logoutAuthSession",
+        "tags": ["Auth"],
+        "summary": "Logout an auth session",
+        "operationId": "logoutSession",
         "responses": {
           "200": {
-            "description": "Logout confirmation",
+            "description": "Logout response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthLogoutResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -306,18 +688,16 @@
     },
     "/v1/auth/me": {
       "get": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Get the current authenticated session",
-        "operationId": "getCurrentAuthSession",
+        "tags": ["Auth"],
+        "summary": "Get current auth session",
+        "operationId": "getAuthSession",
         "responses": {
           "200": {
-            "description": "Current authenticated user and session",
+            "description": "Current session response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthMeResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -331,235 +711,18 @@
         }
       }
     },
-    "/v1/market": {
-      "get": {
-        "tags": [
-          "Market"
-        ],
-        "summary": "List market snapshots",
-        "operationId": "listMarketSnapshots",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Paginated market snapshot list",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketListResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        }
-      }
-    },
-    "/v1/market/{id}": {
-      "get": {
-        "tags": [
-          "Market"
-        ],
-        "summary": "Get market snapshot detail",
-        "operationId": "getMarketSnapshot",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/CoinID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Market snapshot detail",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketDetailResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        }
-      }
-    },
-    "/v1/market/{id}/ohlcv": {
-      "get": {
-        "tags": [
-          "Market"
-        ],
-        "summary": "Get OHLCV candles",
-        "operationId": "getMarketOHLCV",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/CoinID"
-          },
-          {
-            "$ref": "#/components/parameters/Exchange"
-          },
-          {
-            "$ref": "#/components/parameters/Timeframe"
-          },
-          {
-            "$ref": "#/components/parameters/OHLCVLimit"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OHLCV candles",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OHLCVResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        }
-      }
-    },
-    "/v1/market/{id}/tickers": {
-      "get": {
-        "tags": [
-          "Market"
-        ],
-        "summary": "Get aggregated ticker snapshot",
-        "operationId": "getMarketTickers",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/CoinID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Aggregated ticker snapshot",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TickerResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        }
-      }
-    },
-    "/v1/market/{id}/orderbook": {
-      "get": {
-        "tags": [
-          "Market"
-        ],
-        "summary": "Get top-of-book snapshot",
-        "operationId": "getMarketOrderBook",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/CoinID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Top-of-book snapshot",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TickerResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        }
-      }
-    },
-    "/v1/market/{id}/arbitrage": {
-      "get": {
-        "tags": [
-          "Market"
-        ],
-        "summary": "Get recent arbitrage signals",
-        "operationId": "getMarketArbitrage",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/CoinID"
-          },
-          {
-            "$ref": "#/components/parameters/ArbitrageLimit"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Recent arbitrage signals",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ArbitrageResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "$ref": "#/components/responses/ForbiddenError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        }
-      }
-    },
     "/v1/defi": {
       "get": {
-        "tags": [
-          "DeFi"
-        ],
+        "tags": ["DeFi"],
         "summary": "Get DeFi overview",
         "operationId": "getDefiOverview",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/OverviewLimit"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "DeFi overview payload",
+            "description": "DeFi overview response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DefiOverviewResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -572,29 +735,16 @@
     },
     "/v1/defi/protocols": {
       "get": {
-        "tags": [
-          "DeFi"
-        ],
+        "tags": ["DeFi"],
         "summary": "List DeFi protocols",
         "operationId": "listDefiProtocols",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/DefiCategory"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Paginated DeFi protocol list",
+            "description": "DeFi protocol list response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DefiProtocolListResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -607,23 +757,26 @@
     },
     "/v1/defi/protocols/{slug}": {
       "get": {
-        "tags": [
-          "DeFi"
-        ],
-        "summary": "Get DeFi protocol detail",
+        "tags": ["DeFi"],
+        "summary": "Get a DeFi protocol",
         "operationId": "getDefiProtocol",
         "parameters": [
           {
-            "$ref": "#/components/parameters/DefiSlug"
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "DeFi protocol detail",
+            "description": "DeFi protocol response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DefiProtocolResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -639,23 +792,16 @@
     },
     "/v1/defi/chains": {
       "get": {
-        "tags": [
-          "DeFi"
-        ],
+        "tags": ["DeFi"],
         "summary": "List DeFi chains",
         "operationId": "listDefiChains",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Limit"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Chain TVL list",
+            "description": "DeFi chain list response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DefiChainListResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -668,23 +814,16 @@
     },
     "/v1/defi/dexes": {
       "get": {
-        "tags": [
-          "DeFi"
-        ],
-        "summary": "List DeFi DEXes",
+        "tags": ["DeFi"],
+        "summary": "List DEXes",
         "operationId": "listDefiDexes",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Limit"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "DEX volume list",
+            "description": "DEX list response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DefiDexListResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -697,29 +836,16 @@
     },
     "/v1/news": {
       "get": {
-        "tags": [
-          "News"
-        ],
+        "tags": ["News"],
         "summary": "List news articles",
-        "operationId": "listNewsArticles",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/NewsLimit"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/NewsCategory"
-          }
-        ],
+        "operationId": "listNews",
         "responses": {
           "200": {
-            "description": "Paginated news article list",
+            "description": "News list response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NewsArticleListResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -732,36 +858,26 @@
     },
     "/v1/news/{value}": {
       "get": {
-        "tags": [
-          "News"
-        ],
-        "summary": "Get a news article or category feed",
+        "tags": ["News"],
+        "summary": "Get a news article or category view",
         "operationId": "getNewsValue",
         "parameters": [
           {
-            "$ref": "#/components/parameters/NewsValue"
-          },
-          {
-            "$ref": "#/components/parameters/NewsLimit"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "News article detail or category feed",
+            "description": "News detail response",
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/NewsArticleResponse"
-                    },
-                    {
-                      "$ref": "#/components/schemas/NewsArticleListResponse"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -777,29 +893,26 @@
     },
     "/v1/news/coin/{coin_id}": {
       "get": {
-        "tags": [
-          "News"
-        ],
-        "summary": "Get news articles for a coin",
-        "operationId": "getNewsByCoin",
+        "tags": ["News"],
+        "summary": "List news by coin",
+        "operationId": "listNewsByCoin",
         "parameters": [
           {
-            "$ref": "#/components/parameters/CoinID"
-          },
-          {
-            "$ref": "#/components/parameters/NewsLimit"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
+            "name": "coin_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "News articles associated with a coin",
+            "description": "Coin news response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NewsArticleListResponse"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
@@ -812,357 +925,19 @@
     },
     "/v1/news/trending": {
       "get": {
-        "tags": [
-          "News"
-        ],
-        "summary": "Get trending news analytics",
-        "operationId": "getTrendingNews",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/NewsWindow"
-          },
-          {
-            "$ref": "#/components/parameters/TrendingLimit"
-          }
-        ],
+        "tags": ["News"],
+        "summary": "Get trending news aggregates",
+        "operationId": "getNewsTrending",
         "responses": {
           "200": {
             "description": "Trending news response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NewsTrendingResponseEnvelope"
+                  "$ref": "#/components/schemas/DataEnvelope"
                 }
               }
             }
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        }
-      }
-    },
-    "/v1/quant/pattern": {
-      "get": {
-        "tags": [
-          "Quant"
-        ],
-        "summary": "Search similar historical candles by fingerprint",
-        "operationId": "getQuantPatternMatches",
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "query",
-            "required": true,
-            "description": "Exchange symbol such as BTC/USDT.",
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          {
-            "name": "timeframe",
-            "in": "query",
-            "required": true,
-            "description": "Candle timeframe such as 1m, 1h, or 4h.",
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "description": "Maximum number of pattern matches to return.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 50,
-              "default": 20
-            }
-          },
-          {
-            "name": "min_matches",
-            "in": "query",
-            "required": false,
-            "description": "Confidence gate threshold for the similarity sample size.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 30
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Pattern search response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data"
-                  ],
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "required": [
-                        "low_confidence",
-                        "query",
-                        "matches",
-                        "outcomes"
-                      ],
-                      "properties": {
-                        "low_confidence": {
-                          "type": "boolean"
-                        },
-                        "query": {
-                          "type": "object"
-                        },
-                        "matches": {
-                          "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
-                        },
-                        "outcomes": {
-                          "type": "object"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        }
-      }
-    },
-    "/v1/quant/signals/latest": {
-      "get": {
-        "tags": [
-          "Quant"
-        ],
-        "summary": "Get the latest quant signal for a market",
-        "operationId": "getQuantLatestSignal",
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "query",
-            "required": true,
-            "description": "Exchange symbol such as BTC/USDT.",
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          {
-            "name": "timeframe",
-            "in": "query",
-            "required": true,
-            "description": "Candle timeframe such as 1m, 1h, or 4h.",
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          {
-            "name": "exchange",
-            "in": "query",
-            "required": false,
-            "description": "Optional exchange filter such as binance.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Latest signal response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data"
-                  ],
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/QuantSignalLatestResponse"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        }
-      }
-    },
-    "/v1/quant/signals": {
-      "get": {
-        "tags": [
-          "Quant"
-        ],
-        "summary": "List recent quant signals for a market",
-        "operationId": "getQuantSignalHistory",
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "query",
-            "required": true,
-            "description": "Exchange symbol such as BTC/USDT.",
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          {
-            "name": "timeframe",
-            "in": "query",
-            "required": true,
-            "description": "Candle timeframe such as 1m, 1h, or 4h.",
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          {
-            "name": "exchange",
-            "in": "query",
-            "required": false,
-            "description": "Optional exchange filter such as binance.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "description": "Maximum number of signals to return.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 200,
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Signal history response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data"
-                  ],
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/QuantSignalHistoryResponse"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        }
-      }
-    },
-    "/v1/quant/signals/summary": {
-      "get": {
-        "tags": [
-          "Quant"
-        ],
-        "summary": "Summarize recent quant signals for a market",
-        "operationId": "getQuantSignalSummary",
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "query",
-            "required": true,
-            "description": "Exchange symbol such as BTC/USDT.",
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          {
-            "name": "timeframe",
-            "in": "query",
-            "required": true,
-            "description": "Candle timeframe such as 1m, 1h, or 4h.",
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          {
-            "name": "exchange",
-            "in": "query",
-            "required": false,
-            "description": "Optional exchange filter such as binance.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "description": "Sample size used for the summary.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 200,
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Signal summary response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data"
-                  ],
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/QuantSignalSummaryResponse"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
@@ -1172,200 +947,9 @@
     }
   },
   "components": {
-    "parameters": {
-      "CoinID": {
-        "name": "id",
-        "in": "path",
-        "required": true,
-        "description": "Canonical coin identifier such as bitcoin or ethereum.",
-        "schema": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "Limit": {
-        "name": "limit",
-        "in": "query",
-        "required": false,
-        "description": "Maximum number of items to return.",
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 200,
-          "default": 20
-        }
-      },
-      "Offset": {
-        "name": "offset",
-        "in": "query",
-        "required": false,
-        "description": "Zero-based offset into the collection.",
-        "schema": {
-          "type": "integer",
-          "minimum": 0,
-          "default": 0
-        }
-      },
-      "Exchange": {
-        "name": "exchange",
-        "in": "query",
-        "required": false,
-        "description": "Exchange identifier such as binance, bybit, kraken, okx, kucoin, gateio, mexc, or htx.",
-        "schema": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "Timeframe": {
-        "name": "timeframe",
-        "in": "query",
-        "required": false,
-        "description": "OHLCV timeframe.",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "1m",
-            "5m",
-            "15m",
-            "1h",
-            "4h",
-            "1d",
-            "1w"
-          ],
-          "default": "1m"
-        }
-      },
-      "OHLCVLimit": {
-        "name": "limit",
-        "in": "query",
-        "required": false,
-        "description": "Maximum number of candles to return.",
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "default": 200
-        }
-      },
-      "OverviewLimit": {
-        "name": "limit",
-        "in": "query",
-        "required": false,
-        "description": "Maximum number of items to show in each overview section.",
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 20,
-          "default": 5
-        }
-      },
-      "DefiSlug": {
-        "name": "slug",
-        "in": "path",
-        "required": true,
-        "description": "DeFi protocol slug.",
-        "schema": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "DefiCategory": {
-        "name": "category",
-        "in": "query",
-        "required": false,
-        "description": "Optional protocol category filter.",
-        "schema": {
-          "type": "string"
-        }
-      },
-      "ArbitrageLimit": {
-        "name": "limit",
-        "in": "query",
-        "required": false,
-        "description": "Maximum number of arbitrage signals to return.",
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 100,
-          "default": 20
-        }
-      },
-      "NewsLimit": {
-        "name": "limit",
-        "in": "query",
-        "required": false,
-        "description": "Maximum number of news articles to return.",
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 100,
-          "default": 20
-        }
-      },
-      "NewsCategory": {
-        "name": "category",
-        "in": "query",
-        "required": false,
-        "description": "Optional article category filter such as defi, regulation, or macro.",
-        "schema": {
-          "type": "string"
-        }
-      },
-      "NewsValue": {
-        "name": "value",
-        "in": "path",
-        "required": true,
-        "description": "Either a numeric article id or a category slug.",
-        "schema": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "NewsWindow": {
-        "name": "window",
-        "in": "query",
-        "required": false,
-        "description": "Lookback window for trending analytics.",
-        "schema": {
-          "type": "string",
-          "default": "24h"
-        }
-      },
-      "TrendingLimit": {
-        "name": "limit",
-        "in": "query",
-        "required": false,
-        "description": "Maximum number of trending items to return per section.",
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 50,
-          "default": 10
-        }
-      }
-    },
     "responses": {
       "BadRequestError": {
-        "description": "Invalid request",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
-            }
-          }
-        }
-      },
-      "NotFoundError": {
-        "description": "Resource not found",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
-            }
-          }
-        }
-      },
-      "InternalError": {
-        "description": "Unexpected server error",
+        "description": "Bad request",
         "content": {
           "application/json": {
             "schema": {
@@ -1375,7 +959,7 @@
         }
       },
       "UnauthorizedError": {
-        "description": "Authentication required or invalid credentials",
+        "description": "Unauthorized",
         "content": {
           "application/json": {
             "schema": {
@@ -1384,8 +968,8 @@
           }
         }
       },
-      "ForbiddenError": {
-        "description": "Authenticated but insufficient plan",
+      "NotFoundError": {
+        "description": "Not found",
         "content": {
           "application/json": {
             "schema": {
@@ -1395,7 +979,17 @@
         }
       },
       "ServiceUnavailableError": {
-        "description": "Authentication service is unavailable",
+        "description": "Service unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Internal error",
         "content": {
           "application/json": {
             "schema": {
@@ -1406,1866 +1000,68 @@
       }
     },
     "schemas": {
-      "HealthResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/HealthData"
-          }
-        }
-      },
-      "HealthData": {
-        "type": "object",
-        "required": [
-          "ok"
-        ],
-        "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          }
-        }
-      },
       "IndexResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/IndexData"
-          }
-        }
-      },
-      "IndexData": {
-        "type": "object",
-        "required": [
-          "name",
-          "docs",
-          "openapi",
-          "health",
-          "auth"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "dwizzyBRAIN API"
-          },
-          "docs": {
-            "type": "string",
-            "example": "/docs"
-          },
-          "openapi": {
-            "type": "string",
-            "example": "/openapi.json"
-          },
-          "health": {
-            "type": "string",
-            "example": "/v1/health"
-          },
-          "auth": {
-            "type": "string",
-            "example": "/v1/auth/discord/start"
-          }
-        }
-      },
-      "AuthStartData": {
-        "type": "object",
-        "required": [
-          "authorization_url",
-          "state",
-          "state_expires_at"
-        ],
-        "properties": {
-          "authorization_url": {
-            "type": "string",
-            "format": "uri"
-          },
-          "state": {
-            "type": "string"
-          },
-          "state_expires_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "AuthStartResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/AuthStartData"
-          }
-        }
-      },
-      "Web3NonceRequest": {
-        "type": "object",
-        "required": [
-          "wallet_address"
-        ],
-        "properties": {
-          "wallet_address": {
-            "type": "string",
-            "example": "0x1234567890abcdef1234567890abcdef12345678"
-          },
-          "purpose": {
-            "type": "string",
-            "enum": [
-              "login"
-            ],
-            "default": "login"
-          }
-        }
-      },
-      "Web3NonceData": {
-        "type": "object",
-        "required": [
-          "wallet_address",
-          "purpose",
-          "nonce",
-          "challenge",
-          "expires_at"
-        ],
-        "properties": {
-          "wallet_address": {
-            "type": "string"
-          },
-          "purpose": {
-            "type": "string"
-          },
-          "nonce": {
-            "type": "string"
-          },
-          "challenge": {
-            "type": "string"
-          },
-          "expires_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "Web3NonceResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/Web3NonceData"
-          }
-        }
-      },
-      "Web3VerifyRequest": {
-        "type": "object",
-        "required": [
-          "wallet_address",
-          "nonce",
-          "signature"
-        ],
-        "properties": {
-          "wallet_address": {
-            "type": "string",
-            "example": "0x1234567890abcdef1234567890abcdef12345678"
-          },
-          "purpose": {
-            "type": "string",
-            "enum": [
-              "login"
-            ],
-            "default": "login"
-          },
-          "nonce": {
-            "type": "string"
-          },
-          "signature": {
-            "type": "string",
-            "description": "0x-prefixed secp256k1 signature from personal_sign"
-          }
-        }
-      },
-      "AuthUser": {
-        "type": "object",
-        "required": [
-          "id",
-          "username",
-          "display_name",
-          "timezone",
-          "locale",
-          "plan"
-        ],
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          },
-          "display_name": {
-            "type": "string"
-          },
-          "avatar_url": {
-            "type": "string"
-          },
-          "timezone": {
-            "type": "string"
-          },
-          "locale": {
-            "type": "string"
-          },
-          "plan": {
-            "type": "string"
-          }
-        }
-      },
-      "AuthSession": {
-        "type": "object",
-        "required": [
-          "id",
-          "status",
-          "session_family_id",
-          "last_seen_at",
-          "expires_at",
-          "created_at"
-        ],
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "session_family_id": {
-            "type": "string"
-          },
-          "last_seen_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "expires_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "revoked_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "AuthLoginData": {
-        "type": "object",
-        "required": [
-          "user",
-          "session",
-          "access_token",
-          "access_token_expires_at",
-          "refresh_token_expires_at",
-          "token_type"
-        ],
-        "properties": {
-          "user": {
-            "$ref": "#/components/schemas/AuthUser"
-          },
-          "session": {
-            "$ref": "#/components/schemas/AuthSession"
-          },
-          "access_token": {
-            "type": "string"
-          },
-          "access_token_expires_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "refresh_token_expires_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "token_type": {
-            "type": "string"
-          }
-        }
-      },
-      "AuthLoginResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/AuthLoginData"
-          }
-        }
-      },
-      "AuthMeResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "type": "object",
-            "required": [
-              "user",
-              "session"
-            ],
+            "required": ["name", "docs", "openapi", "health", "content", "download", "auth"],
             "properties": {
-              "user": {
-                "$ref": "#/components/schemas/AuthUser"
-              },
-              "session": {
-                "$ref": "#/components/schemas/AuthSession"
-              }
+              "name": { "type": "string" },
+              "docs": { "type": "string" },
+              "openapi": { "type": "string" },
+              "health": { "type": "string" },
+              "content": { "type": "string" },
+              "download": { "type": "string" },
+              "auth": { "type": "string" }
             }
           }
         }
       },
-      "AuthLogoutResponse": {
+      "HealthResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "type": "object",
-            "required": [
-              "ok"
-            ],
+            "required": ["ok"],
             "properties": {
               "ok": {
-                "type": "boolean",
-                "const": true
+                "type": "boolean"
               }
             }
+          }
+        }
+      },
+      "DataEnvelope": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": true
           }
         }
       },
       "ErrorResponse": {
         "type": "object",
-        "required": [
-          "error"
-        ],
+        "required": ["error"],
         "properties": {
           "error": {
-            "$ref": "#/components/schemas/ErrorBody"
-          }
-        }
-      },
-      "ErrorBody": {
-        "type": "object",
-        "required": [
-          "code",
-          "message"
-        ],
-        "properties": {
-          "code": {
-            "type": "string",
-            "example": "not_found"
-          },
-          "message": {
-            "type": "string",
-            "example": "coin \"bitcoin\" not found"
-          }
-        }
-      },
-      "PaginationMeta": {
-        "type": "object",
-        "required": [
-          "total",
-          "limit",
-          "offset"
-        ],
-        "properties": {
-          "total": {
-            "type": "integer",
-            "minimum": 0,
-            "example": 1000
-          },
-          "limit": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 200,
-            "example": 20
-          },
-          "offset": {
-            "type": "integer",
-            "minimum": 0,
-            "example": 0
-          }
-        }
-      },
-      "MarketListResponse": {
-        "type": "object",
-        "required": [
-          "data",
-          "meta"
-        ],
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SnapshotSummary"
-            }
-          },
-          "meta": {
-            "$ref": "#/components/schemas/PaginationMeta"
-          }
-        }
-      },
-      "PriceSource": {
-        "type": "object",
-        "required": [
-          "exchange",
-          "symbol"
-        ],
-        "properties": {
-          "exchange": {
-            "type": "string",
-            "example": "binance"
-          },
-          "symbol": {
-            "type": "string",
-            "example": "BTC/USDT"
-          }
-        }
-      },
-      "Availability": {
-        "type": "object",
-        "required": [
-          "tier",
-          "on_binance",
-          "on_bybit",
-          "on_okx",
-          "on_kucoin",
-          "on_gate",
-          "on_kraken",
-          "on_mexc",
-          "on_htx",
-          "on_coinpaprika",
-          "is_dex_only",
-          "assigned_at",
-          "updated_at"
-        ],
-        "properties": {
-          "tier": {
-            "type": "string",
-            "example": "A"
-          },
-          "on_binance": {
-            "type": "boolean"
-          },
-          "on_bybit": {
-            "type": "boolean"
-          },
-          "on_okx": {
-            "type": "boolean"
-          },
-          "on_kucoin": {
-            "type": "boolean"
-          },
-          "on_gate": {
-            "type": "boolean"
-          },
-          "on_kraken": {
-            "type": "boolean"
-          },
-          "on_mexc": {
-            "type": "boolean"
-          },
-          "on_htx": {
-            "type": "boolean"
-          },
-          "on_coinpaprika": {
-            "type": "boolean"
-          },
-          "is_dex_only": {
-            "type": "boolean"
-          },
-          "binance_verified_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "bybit_verified_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "assigned_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ColdData": {
-        "type": "object",
-        "properties": {
-          "description": {
-            "type": "string"
-          },
-          "links": {
             "type": "object",
-            "additionalProperties": true
-          },
-          "ath_usd": {
-            "type": "number"
-          },
-          "atl_usd": {
-            "type": "number"
-          },
-          "ath_date": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "atl_date": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "market_cap_rank": {
-            "type": "integer"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "MappingSnapshot": {
-        "type": "object",
-        "required": [
-          "coin_id",
-          "exchange",
-          "exchange_symbol",
-          "base_asset",
-          "quote_asset",
-          "is_primary",
-          "verified_at"
-        ],
-        "properties": {
-          "coin_id": {
-            "type": "string",
-            "example": "bitcoin"
-          },
-          "exchange": {
-            "type": "string",
-            "example": "binance"
-          },
-          "exchange_symbol": {
-            "type": "string",
-            "example": "BTC/USDT"
-          },
-          "base_asset": {
-            "type": "string",
-            "example": "BTC"
-          },
-          "quote_asset": {
-            "type": "string",
-            "example": "USDT"
-          },
-          "is_primary": {
-            "type": "boolean"
-          },
-          "verified_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ExchangePrice": {
-        "type": "object",
-        "required": [
-          "exchange",
-          "symbol"
-        ],
-        "properties": {
-          "exchange": {
-            "type": "string",
-            "example": "binance"
-          },
-          "symbol": {
-            "type": "string",
-            "example": "BTC/USDT"
-          },
-          "price": {
-            "type": "number"
-          }
-        }
-      },
-      "ArbitrageSignal": {
-        "type": "object",
-        "required": [
-          "id",
-          "detected_at",
-          "coin_id",
-          "symbol",
-          "buy_exchange",
-          "sell_exchange",
-          "buy_price",
-          "sell_price",
-          "gross_spread_pct",
-          "is_profitable",
-          "buy_depth_usd",
-          "sell_depth_usd",
-          "alerted"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "detected_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "coin_id": {
-            "type": "string",
-            "example": "bitcoin"
-          },
-          "symbol": {
-            "type": "string",
-            "example": "BTC/USDT"
-          },
-          "buy_exchange": {
-            "type": "string",
-            "example": "gateio"
-          },
-          "sell_exchange": {
-            "type": "string",
-            "example": "htx"
-          },
-          "buy_price": {
-            "type": "number"
-          },
-          "sell_price": {
-            "type": "number"
-          },
-          "gross_spread_pct": {
-            "type": "number"
-          },
-          "is_profitable": {
-            "type": "boolean"
-          },
-          "buy_depth_usd": {
-            "type": "number"
-          },
-          "sell_depth_usd": {
-            "type": "number"
-          },
-          "alerted": {
-            "type": "boolean"
-          }
-        }
-      },
-      "SnapshotSummary": {
-        "type": "object",
-        "required": [
-          "coin_id",
-          "symbol",
-          "name",
-          "rank",
-          "updated_at",
-          "availability",
-          "exchange_count"
-        ],
-        "properties": {
-          "coin_id": {
-            "type": "string",
-            "example": "bitcoin"
-          },
-          "symbol": {
-            "type": "string",
-            "example": "btc"
-          },
-          "name": {
-            "type": "string",
-            "example": "Bitcoin"
-          },
-          "image_url": {
-            "type": "string",
-            "format": "uri"
-          },
-          "rank": {
-            "type": "integer",
-            "example": 1
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "availability": {
-            "$ref": "#/components/schemas/Availability"
-          },
-          "exchange_count": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "current_price_usd": {
-            "type": "number"
-          },
-          "price_source": {
-            "$ref": "#/components/schemas/PriceSource"
-          }
-        }
-      },
-      "SnapshotDetail": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/SnapshotSummary"
-          },
-          {
-            "type": "object",
-            "required": [
-              "cold_data",
-              "mappings",
-              "exchange_prices"
-            ],
+            "required": ["code", "message"],
             "properties": {
-              "cold_data": {
-                "$ref": "#/components/schemas/ColdData"
+              "code": {
+                "type": "string"
               },
-              "mappings": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/MappingSnapshot"
-                }
-              },
-              "exchange_prices": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ExchangePrice"
-                }
-              },
-              "recent_arbitrage": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ArbitrageSignal"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "MarketDetailResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/SnapshotDetail"
-          }
-        }
-      },
-      "OHLCVPoint": {
-        "type": "object",
-        "required": [
-          "timestamp",
-          "coin_id",
-          "exchange",
-          "symbol",
-          "timeframe",
-          "open",
-          "high",
-          "low",
-          "close",
-          "volume",
-          "quote_volume",
-          "trades",
-          "is_closed"
-        ],
-        "properties": {
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "coin_id": {
-            "type": "string",
-            "example": "bitcoin"
-          },
-          "exchange": {
-            "type": "string",
-            "example": "binance"
-          },
-          "symbol": {
-            "type": "string",
-            "example": "BTC/USDT"
-          },
-          "timeframe": {
-            "type": "string",
-            "example": "1m"
-          },
-          "open": {
-            "type": "number"
-          },
-          "high": {
-            "type": "number"
-          },
-          "low": {
-            "type": "number"
-          },
-          "close": {
-            "type": "number"
-          },
-          "volume": {
-            "type": "number"
-          },
-          "quote_volume": {
-            "type": "number"
-          },
-          "trades": {
-            "type": "integer"
-          },
-          "is_closed": {
-            "type": "boolean"
-          }
-        }
-      },
-      "OHLCVResponse": {
-        "type": "object",
-        "required": [
-          "data",
-          "meta"
-        ],
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OHLCVPoint"
-            }
-          },
-          "meta": {
-            "type": "object",
-            "required": [
-              "coin_id",
-              "exchange",
-              "timeframe",
-              "limit"
-            ],
-            "properties": {
-              "coin_id": {
-                "type": "string",
-                "example": "bitcoin"
-              },
-              "exchange": {
-                "type": "string",
-                "example": "binance"
-              },
-              "timeframe": {
-                "type": "string",
-                "example": "1m"
-              },
-              "limit": {
-                "type": "integer",
-                "minimum": 1
-              }
-            }
-          }
-        }
-      },
-      "TickerExchange": {
-        "type": "object",
-        "required": [
-          "exchange",
-          "symbol",
-          "timestamp",
-          "is_stale"
-        ],
-        "properties": {
-          "exchange": {
-            "type": "string",
-            "example": "binance"
-          },
-          "symbol": {
-            "type": "string",
-            "example": "BTC/USDT"
-          },
-          "price": {
-            "type": "number"
-          },
-          "bid": {
-            "type": "number"
-          },
-          "ask": {
-            "type": "number"
-          },
-          "volume_24h": {
-            "type": "number"
-          },
-          "spread_pct": {
-            "type": "number"
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "is_stale": {
-            "type": "boolean"
-          }
-        }
-      },
-      "TickerSnapshot": {
-        "type": "object",
-        "required": [
-          "coin_id",
-          "exchange_count",
-          "exchanges"
-        ],
-        "properties": {
-          "coin_id": {
-            "type": "string",
-            "example": "bitcoin"
-          },
-          "best_bid": {
-            "type": "number"
-          },
-          "best_bid_exchange": {
-            "type": "string",
-            "example": "htx"
-          },
-          "best_ask": {
-            "type": "number"
-          },
-          "best_ask_exchange": {
-            "type": "string",
-            "example": "kraken"
-          },
-          "cross_exchange_spread_pct": {
-            "type": "number"
-          },
-          "exchange_count": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "exchanges": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TickerExchange"
-            }
-          }
-        }
-      },
-      "TickerResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/TickerSnapshot"
-          }
-        }
-      },
-      "ArbitrageResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ArbitrageSignal"
-            }
-          }
-        }
-      },
-      "DefiProtocolSummary": {
-        "type": "object",
-        "required": [
-          "slug",
-          "name",
-          "updated_at"
-        ],
-        "properties": {
-          "slug": {
-            "type": "string",
-            "example": "uniswap"
-          },
-          "name": {
-            "type": "string",
-            "example": "Uniswap"
-          },
-          "description": {
-            "type": "string"
-          },
-          "logo": {
-            "type": "string"
-          },
-          "category": {
-            "type": "string",
-            "example": "dex"
-          },
-          "url": {
-            "type": "string"
-          },
-          "twitter": {
-            "type": "string"
-          },
-          "coin_id": {
-            "type": "string"
-          },
-          "audit_status": {
-            "type": "string"
-          },
-          "oracles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "tier": {
-            "type": "string",
-            "example": "top50"
-          },
-          "tvl_usd": {
-            "type": "number"
-          },
-          "tvl_change_1d_pct": {
-            "type": "number"
-          },
-          "tvl_change_7d_pct": {
-            "type": "number"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "DefiChainSummary": {
-        "type": "object",
-        "required": [
-          "chain",
-          "updated_at"
-        ],
-        "properties": {
-          "chain": {
-            "type": "string",
-            "example": "ethereum"
-          },
-          "tvl_usd": {
-            "type": "number"
-          },
-          "tvl_change_1d_pct": {
-            "type": "number"
-          },
-          "tvl_change_7d_pct": {
-            "type": "number"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "DefiDexSummary": {
-        "type": "object",
-        "required": [
-          "slug",
-          "name",
-          "updated_at"
-        ],
-        "properties": {
-          "slug": {
-            "type": "string",
-            "example": "uniswap-v3"
-          },
-          "name": {
-            "type": "string",
-            "example": "Uniswap V3"
-          },
-          "volume_24h_usd": {
-            "type": "number"
-          },
-          "volume_7d_usd": {
-            "type": "number"
-          },
-          "volume_30d_usd": {
-            "type": "number"
-          },
-          "volume_change_1d_pct": {
-            "type": "number"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "DefiOverview": {
-        "type": "object",
-        "required": [
-          "protocols",
-          "chains",
-          "dexes"
-        ],
-        "properties": {
-          "protocols": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DefiProtocolSummary"
-            }
-          },
-          "chains": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DefiChainSummary"
-            }
-          },
-          "dexes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DefiDexSummary"
-            }
-          }
-        }
-      },
-      "DefiOverviewResponse": {
-        "type": "object",
-        "required": [
-          "data",
-          "meta"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/DefiOverview"
-          },
-          "meta": {
-            "type": "object",
-            "required": [
-              "limit"
-            ],
-            "properties": {
-              "limit": {
-                "type": "integer",
-                "minimum": 1
-              }
-            }
-          }
-        }
-      },
-      "DefiProtocolListResponse": {
-        "type": "object",
-        "required": [
-          "data",
-          "meta"
-        ],
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DefiProtocolSummary"
-            }
-          },
-          "meta": {
-            "type": "object",
-            "required": [
-              "total",
-              "limit",
-              "offset"
-            ],
-            "properties": {
-              "total": {
-                "type": "integer",
-                "minimum": 0
-              },
-              "limit": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 200
-              },
-              "offset": {
-                "type": "integer",
-                "minimum": 0
-              },
-              "category": {
+              "message": {
                 "type": "string"
               }
-            }
-          }
-        }
-      },
-      "DefiProtocolResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/DefiProtocolSummary"
-          }
-        }
-      },
-      "DefiChainListResponse": {
-        "type": "object",
-        "required": [
-          "data",
-          "meta"
-        ],
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DefiChainSummary"
-            }
-          },
-          "meta": {
-            "type": "object",
-            "required": [
-              "limit"
-            ],
-            "properties": {
-              "limit": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 200
-              }
-            }
-          }
-        }
-      },
-      "DefiDexListResponse": {
-        "type": "object",
-        "required": [
-          "data",
-          "meta"
-        ],
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DefiDexSummary"
-            }
-          },
-          "meta": {
-            "type": "object",
-            "required": [
-              "limit"
-            ],
-            "properties": {
-              "limit": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 200
-              }
-            }
-          }
-        }
-      },
-      "NewsArticleMetadata": {
-        "type": "object",
-        "properties": {
-          "summary_short": {
-            "type": "string"
-          },
-          "summary_long": {
-            "type": "string"
-          },
-          "key_points": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "sentiment": {
-            "type": "string"
-          },
-          "sentiment_score": {
-            "type": "number"
-          },
-          "category": {
-            "type": "string"
-          },
-          "subcategory": {
-            "type": "string"
-          },
-          "importance_score": {
-            "type": "number"
-          },
-          "is_breaking": {
-            "type": "boolean"
-          },
-          "breaking_type": {
-            "type": "string"
-          },
-          "model_used": {
-            "type": "string"
-          },
-          "processing_latency_ms": {
-            "type": "integer"
-          },
-          "processed_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "NewsEntity": {
-        "type": "object",
-        "required": [
-          "entity_type",
-          "is_primary",
-          "mention_count"
-        ],
-        "properties": {
-          "coin_id": {
-            "type": "string"
-          },
-          "llama_slug": {
-            "type": "string"
-          },
-          "entity_type": {
-            "type": "string"
-          },
-          "entity_name": {
-            "type": "string"
-          },
-          "is_primary": {
-            "type": "boolean"
-          },
-          "mention_count": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "confidence": {
-            "type": "number"
-          }
-        }
-      },
-      "NewsPriceImpact": {
-        "type": "object",
-        "required": [
-          "coin_id",
-          "published_at",
-          "snapshot_1h_done",
-          "snapshot_4h_done",
-          "snapshot_24h_done"
-        ],
-        "properties": {
-          "coin_id": {
-            "type": "string"
-          },
-          "published_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "price_at_publish": {
-            "type": "number"
-          },
-          "price_1h": {
-            "type": "number"
-          },
-          "price_4h": {
-            "type": "number"
-          },
-          "price_24h": {
-            "type": "number"
-          },
-          "change_pct_1h": {
-            "type": "number"
-          },
-          "change_pct_4h": {
-            "type": "number"
-          },
-          "change_pct_24h": {
-            "type": "number"
-          },
-          "snapshot_1h_done": {
-            "type": "boolean"
-          },
-          "snapshot_4h_done": {
-            "type": "boolean"
-          },
-          "snapshot_24h_done": {
-            "type": "boolean"
-          }
-        }
-      },
-      "NewsArticleSummary": {
-        "type": "object",
-        "required": [
-          "id",
-          "external_id",
-          "source",
-          "title",
-          "published_at",
-          "fetched_at",
-          "is_processed"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "external_id": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          },
-          "source_name": {
-            "type": "string"
-          },
-          "source_credibility": {
-            "type": "number"
-          },
-          "title": {
-            "type": "string"
-          },
-          "body_preview": {
-            "type": "string"
-          },
-          "full_url": {
-            "type": "string"
-          },
-          "image_url": {
-            "type": "string"
-          },
-          "author": {
-            "type": "string"
-          },
-          "published_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "fetched_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "is_processed": {
-            "type": "boolean"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/NewsArticleMetadata"
-          }
-        }
-      },
-      "NewsArticleDetail": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/NewsArticleSummary"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "entities": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/NewsEntity"
-                }
-              },
-              "price_impact": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/NewsPriceImpact"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "NewsArticleListMeta": {
-        "type": "object",
-        "required": [
-          "total",
-          "limit",
-          "offset"
-        ],
-        "properties": {
-          "total": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "limit": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 100
-          },
-          "offset": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "category": {
-            "type": "string"
-          },
-          "coin_id": {
-            "type": "string"
-          }
-        }
-      },
-      "NewsArticleListResponse": {
-        "type": "object",
-        "required": [
-          "data",
-          "meta"
-        ],
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NewsArticleSummary"
-            }
-          },
-          "meta": {
-            "$ref": "#/components/schemas/NewsArticleListMeta"
-          }
-        }
-      },
-      "NewsArticleResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/NewsArticleDetail"
-          }
-        }
-      },
-      "NewsTrendingCoin": {
-        "type": "object",
-        "required": [
-          "coin_id",
-          "mention_count"
-        ],
-        "properties": {
-          "coin_id": {
-            "type": "string"
-          },
-          "symbol": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "mention_count": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "avg_sentiment_score": {
-            "type": "number"
-          },
-          "avg_importance_score": {
-            "type": "number"
-          }
-        }
-      },
-      "NewsTrendingProtocol": {
-        "type": "object",
-        "required": [
-          "slug",
-          "mention_count"
-        ],
-        "properties": {
-          "slug": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "mention_count": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "avg_importance_score": {
-            "type": "number"
-          }
-        }
-      },
-      "NewsTrendingCategory": {
-        "type": "object",
-        "required": [
-          "category",
-          "mention_count"
-        ],
-        "properties": {
-          "category": {
-            "type": "string"
-          },
-          "mention_count": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "avg_importance_score": {
-            "type": "number"
-          }
-        }
-      },
-      "NewsTrendingArticle": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/NewsArticleSummary"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "importance_score": {
-                "type": "number"
-              }
-            }
-          }
-        ]
-      },
-      "NewsTrendingResponse": {
-        "type": "object",
-        "required": [
-          "window",
-          "generated_at",
-          "coins",
-          "protocols",
-          "categories",
-          "top_articles"
-        ],
-        "properties": {
-          "window": {
-            "type": "string"
-          },
-          "generated_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "coins": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NewsTrendingCoin"
-            }
-          },
-          "protocols": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NewsTrendingProtocol"
-            }
-          },
-          "categories": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NewsTrendingCategory"
-            }
-          },
-          "top_articles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NewsTrendingArticle"
-            }
-          }
-        }
-      },
-      "NewsTrendingResponseEnvelope": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/NewsTrendingResponse"
-          }
-        }
-      },
-      "QuantSignalQuery": {
-        "type": "object",
-        "required": [
-          "symbol",
-          "timeframe"
-        ],
-        "properties": {
-          "symbol": {
-            "type": "string"
-          },
-          "timeframe": {
-            "type": "string"
-          },
-          "exchange": {
-            "type": "string"
-          }
-        }
-      },
-      "QuantSignalRecord": {
-        "type": "object",
-        "required": [
-          "id",
-          "created_at",
-          "coin_id",
-          "exchange",
-          "symbol",
-          "timeframe",
-          "signal_type",
-          "volume_spike",
-          "price_deviation"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "coin_id": {
-            "type": "string"
-          },
-          "exchange": {
-            "type": "string"
-          },
-          "symbol": {
-            "type": "string"
-          },
-          "timeframe": {
-            "type": "string"
-          },
-          "quant_score": {
-            "type": "number"
-          },
-          "signal_type": {
-            "type": "string"
-          },
-          "strength": {
-            "type": "string"
-          },
-          "rsi_14": {
-            "type": "number"
-          },
-          "macd_line": {
-            "type": "number"
-          },
-          "macd_signal": {
-            "type": "number"
-          },
-          "macd_hist": {
-            "type": "number"
-          },
-          "bb_upper": {
-            "type": "number"
-          },
-          "bb_lower": {
-            "type": "number"
-          },
-          "bb_mid": {
-            "type": "number"
-          },
-          "ema_9": {
-            "type": "number"
-          },
-          "ema_21": {
-            "type": "number"
-          },
-          "ema_200": {
-            "type": "number"
-          },
-          "funding_rate": {
-            "type": "number"
-          },
-          "funding_sentiment": {
-            "type": "string"
-          },
-          "volume_spike": {
-            "type": "boolean"
-          },
-          "price_deviation": {
-            "type": "boolean"
-          },
-          "anomaly_score": {
-            "type": "number"
-          },
-          "price_at_signal": {
-            "type": "number"
-          }
-        }
-      },
-      "QuantSignalLatestResponse": {
-        "type": "object",
-        "required": [
-          "query",
-          "signal"
-        ],
-        "properties": {
-          "query": {
-            "$ref": "#/components/schemas/QuantSignalQuery"
-          },
-          "signal": {
-            "$ref": "#/components/schemas/QuantSignalRecord"
-          }
-        }
-      },
-      "QuantSignalHistoryResponse": {
-        "type": "object",
-        "required": [
-          "query",
-          "limit",
-          "items"
-        ],
-        "properties": {
-          "query": {
-            "$ref": "#/components/schemas/QuantSignalQuery"
-          },
-          "limit": {
-            "type": "integer"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QuantSignalRecord"
-            }
-          }
-        }
-      },
-      "QuantSignalSummaryResponse": {
-        "type": "object",
-        "required": [
-          "query",
-          "limit",
-          "count",
-          "signal_type_counts"
-        ],
-        "properties": {
-          "query": {
-            "$ref": "#/components/schemas/QuantSignalQuery"
-          },
-          "limit": {
-            "type": "integer"
-          },
-          "count": {
-            "type": "integer"
-          },
-          "latest": {
-            "$ref": "#/components/schemas/QuantSignalRecord"
-          },
-          "avg_quant_score": {
-            "type": "number"
-          },
-          "avg_funding_rate": {
-            "type": "number"
-          },
-          "avg_anomaly_score": {
-            "type": "number"
-          },
-          "volume_spike_rate": {
-            "type": "number"
-          },
-          "price_deviation_rate": {
-            "type": "number"
-          },
-          "signal_type_counts": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer"
-            }
-          },
-          "strength_counts": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer"
             }
           }
         }

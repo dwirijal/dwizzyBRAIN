@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestOpenAPISpecContainsMarketPaths(t *testing.T) {
+func TestOpenAPISpecContainsGatewayPaths(t *testing.T) {
 	var doc map[string]any
 	if err := json.Unmarshal(openAPISpec, &doc); err != nil {
 		t.Fatalf("unmarshal openapi: %v", err)
@@ -15,6 +15,13 @@ func TestOpenAPISpecContainsMarketPaths(t *testing.T) {
 
 	if doc["openapi"] != "3.1.0" {
 		t.Fatalf("expected openapi 3.1.0, got %v", doc["openapi"])
+	}
+	info, ok := doc["info"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected info map")
+	}
+	if info["version"] != "2.2.0" {
+		t.Fatalf("expected api contract version 2.2.0, got %v", info["version"])
 	}
 
 	paths, ok := doc["paths"].(map[string]any)
@@ -24,6 +31,19 @@ func TestOpenAPISpecContainsMarketPaths(t *testing.T) {
 
 	for _, path := range []string{
 		"/v1/health",
+		"/v1/content/manhwa",
+		"/v1/content/manhwa/{slug}",
+		"/v1/content/manhwa/{slug}/units",
+		"/v1/content/units/{slug}",
+		"/v1/download/aio",
+		"/v1/download/youtube/info",
+		"/v1/download/youtube/video",
+		"/v1/download/youtube/audio",
+		"/v1/download/youtube/playlist",
+		"/v1/download/youtube/subtitle",
+		"/v1/download/instagram",
+		"/v1/download/tiktok",
+		"/v1/download/spotify",
 		"/v1/auth/discord/start",
 		"/v1/auth/discord/callback",
 		"/v1/auth/web3/nonce",
@@ -31,12 +51,6 @@ func TestOpenAPISpecContainsMarketPaths(t *testing.T) {
 		"/v1/auth/refresh",
 		"/v1/auth/logout",
 		"/v1/auth/me",
-		"/v1/market",
-		"/v1/market/{id}",
-		"/v1/market/{id}/ohlcv",
-		"/v1/market/{id}/tickers",
-		"/v1/market/{id}/orderbook",
-		"/v1/market/{id}/arbitrage",
 		"/v1/defi",
 		"/v1/defi/protocols",
 		"/v1/defi/protocols/{slug}",
@@ -46,10 +60,6 @@ func TestOpenAPISpecContainsMarketPaths(t *testing.T) {
 		"/v1/news/{value}",
 		"/v1/news/coin/{coin_id}",
 		"/v1/news/trending",
-		"/v1/quant/pattern",
-		"/v1/quant/signals",
-		"/v1/quant/signals/latest",
-		"/v1/quant/signals/summary",
 	} {
 		if _, ok := paths[path]; !ok {
 			t.Fatalf("expected path %s in openapi spec", path)
