@@ -15,6 +15,8 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
     "docs": "/docs",
     "openapi": "/openapi.json",
     "health": "/v1/health",
+    "content": "/v1/content/manhwa",
+    "download": "/v1/download/*",
     "auth": "/v1/auth/discord/start"
   }
 }`))
