@@ -97,6 +97,10 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s.serveRoute(w, r, spec)
+}
+
+func (s *Service) serveRoute(w http.ResponseWriter, r *http.Request, spec routeSpec) {
 	body, _ := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -174,6 +178,7 @@ func (p proxyResponse) StatusClass() string {
 
 func (s *Service) proxyWithFallback(ctx context.Context, r *http.Request, spec routeSpec, body []byte) (proxyResponse, []string, error) {
 	attempted := make([]string, 0, len(spec.Providers))
+	var timeoutErr error
 	for _, provider := range spec.Providers {
 		if !s.circuit.Allow(provider) {
 			attempted = append(attempted, string(provider))
@@ -182,6 +187,9 @@ func (s *Service) proxyWithFallback(ctx context.Context, r *http.Request, spec r
 		resp, err := s.attemptProvider(ctx, r, provider, body, spec.Timeout)
 		attempted = append(attempted, string(provider))
 		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				timeoutErr = err
+			}
 			s.circuit.Failure(provider)
 			continue
 		}
@@ -197,6 +205,9 @@ func (s *Service) proxyWithFallback(ctx context.Context, r *http.Request, spec r
 		s.circuit.Success(provider)
 		resp.FallbackChain = append([]string(nil), attempted...)
 		return resp, attempted, nil
+	}
+	if timeoutErr != nil {
+		return proxyResponse{}, attempted, fmt.Errorf("all providers failed for %s: %w", r.URL.Path, timeoutErr)
 	}
 	return proxyResponse{}, attempted, fmt.Errorf("all providers failed for %s", r.URL.Path)
 }

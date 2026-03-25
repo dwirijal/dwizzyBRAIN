@@ -341,35 +341,6 @@ func downloadRouteAllowed(path string) bool {
 		lower == "/v1/download/shopee/video",
 		lower == "/v1/download/nhentai":
 		return true
-	case strings.HasPrefix(lower, "/v1/download/youtube/"),
-		strings.HasPrefix(lower, "/v1/download/tiktok/"),
-		strings.HasPrefix(lower, "/v1/download/instagram/"),
-		strings.HasPrefix(lower, "/v1/download/spotify/"),
-		strings.HasPrefix(lower, "/v1/download/soundcloud/"),
-		strings.HasPrefix(lower, "/v1/download/bilibili/"),
-		strings.HasPrefix(lower, "/v1/download/bstation/"):
-		return true
-	case strings.HasPrefix(lower, "/v1/download/facebook/"),
-		strings.HasPrefix(lower, "/v1/download/threads/"),
-		strings.HasPrefix(lower, "/v1/download/twitter/"),
-		strings.HasPrefix(lower, "/v1/download/pinterest/"),
-		strings.HasPrefix(lower, "/v1/download/gdrive/"),
-		strings.HasPrefix(lower, "/v1/download/tidal/"),
-		strings.HasPrefix(lower, "/v1/download/deezer/"),
-		strings.HasPrefix(lower, "/v1/download/capcut/"),
-		strings.HasPrefix(lower, "/v1/download/scribd/"),
-		strings.HasPrefix(lower, "/v1/download/mediafire/"),
-		strings.HasPrefix(lower, "/v1/download/mega/"),
-		strings.HasPrefix(lower, "/v1/download/terabox/"),
-		strings.HasPrefix(lower, "/v1/download/pixeldrain/"),
-		strings.HasPrefix(lower, "/v1/download/krakenfiles/"),
-		strings.HasPrefix(lower, "/v1/download/danbooru/"),
-		strings.HasPrefix(lower, "/v1/download/reddit/"),
-		strings.HasPrefix(lower, "/v1/download/applemusic/"),
-		strings.HasPrefix(lower, "/v1/download/videy/"),
-		strings.HasPrefix(lower, "/v1/download/sfile/"),
-		strings.HasPrefix(lower, "/v1/download/nhentai/"):
-		return true
 	default:
 		return false
 	}
