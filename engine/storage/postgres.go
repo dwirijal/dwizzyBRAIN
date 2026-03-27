@@ -12,7 +12,10 @@ import (
 func NewPostgresPoolFromEnv(ctx context.Context) (*pgxpool.Pool, error) {
 	rawURL := strings.TrimSpace(os.Getenv("POSTGRES_URL"))
 	if rawURL == "" {
-		return nil, fmt.Errorf("POSTGRES_URL is required")
+		rawURL = strings.TrimSpace(os.Getenv("NEON_DATABASE_URL"))
+	}
+	if rawURL == "" {
+		return nil, fmt.Errorf("POSTGRES_URL is required (NEON_DATABASE_URL supported as compatibility fallback)")
 	}
 
 	return NewPostgresPool(ctx, rawURL)
